@@ -1,67 +1,93 @@
 # Load libraries ---------------------------------------------------------------
 
+library(here)
 library(ggraph)
 library(igraph)
-library(statgl)
+library(statgl) 
+library(extrafont)
 library(tidyverse)
 
 # Import data ------------------------------------------------------------------
 
+# Statistics Greenland API
 import_export_raw <- statgl_url("IEXSITC") %>% 
   statgl_fetch(time = 2019, quarter = 0, .eliminate_rest = FALSE) %>% 
+  select(-c(quarter, time)) %>% 
+  replace_na(list(value = 1)) %>% 
+  pivot_wider(names_from = "transaction") %>% 
   as_tibble()
 
 # Tidy -------------------------------------------------------------------------
 
-# Define categories
+# Tidied
+import_export <- import_export_raw %>% 
+  filter(!str_detect(processing, "\\d-\\d")) %>% 
+  separate(processing, c("id", "text"), sep = " ", extra = "merge", convert = T)
+
+# Categories
 cats <- import_export_raw %>% 
-  filter(
-    str_detect(processing, "\\d-\\d"), !str_detect(processing, "Total")
-  ) %>% 
-  pivot_wider(names_from = "transaction") %>% 
+  filter(str_detect(processing, "\\d-\\d"), !str_detect(processing, "Total")) %>% 
   extract(
     processing, c("lo", "hi", "cat"), "(\\d+)-(\\d+) (.+), total", 
     convert = TRUE
   ) %>% 
-  complete(lo = min(lo):max(lo)) %>% 
-  fill(cat) %>% 
-  select(lo, cat)
+  group_by(cat) %>% 
+  summarise(id = seq(from = lo, to = hi), .groups = "drop") %>% 
+  arrange(id)
 
-# Tidy data
-import_export <- import_export_raw %>% 
-  filter(!str_detect(processing, "-")) %>% 
-  separate(processing, c("lo", "det_text"), convert = TRUE, extra = "merge") %>% 
-  unite(text1, det_text, transaction, sep = ".") %>% 
-  left_join(cats)
+# Build Tree -------------------------------------------------------------------
 
-# Treeify ----------------------------------------------------------------------
+leaves <- import_export %>% left_join(cats) %>% 
+  select(group = cat, subitem = text, size = import)
 
-df <- 
-  import_export %>% 
-  filter(str_detect(text1, "export$")) %>% 
-  select(cat, text1, size = value) %>% tidyr::drop_na()
+df <- tibble(group = "Root", subitem = unique(cats$cat), size = 0) %>% 
+  bind_rows(leaves) %>% 
+  mutate(size = size + 1)
 
-root <- df %>% 
-  distinct(cat) %>% mutate(root = "root") %>% rename(text1 = cat, cat = root)
+vertices <- df %>% 
+  distinct(subitem, size) %>% 
+  add_row(subitem = "Root", size = 1)
 
-df <- df %>% 
-  bind_rows(root) %>% 
-  tidyr::replace_na(list(size = 0))
+# Manually punch in categories -------------------------------------------------
 
-vertices <- df %>% distinct(text1, size) %>% 
-  mutate(labl = "test") %>% 
-  add_row(text1 = "root", size = 0)
+# vertices %>% 
+#   write_csv2(here("data", "01_vertices_import.csv"))
 
-# TODO: Beter labels (like)
-# c("Live Animals (Not Fish)", "Meat", "Dairy and Eggs", "Fish", "Cereal", "Vegetables and Fruit", "Sugar", "Coffee, Tea, Cocoa, Spices", "Fodder", "Misc. Edible", "Beverages", "Tobacco", "Hides and Skins", "Oil Seeds", "Crude rubber", "Cork and Wood", "Pulp", "Textile Fibers", "Crude Fertilizers", "Metal Ores and Scrap", "Crude Animal/Vegetable materials", "Coal", "Petroleum", "Gas", "Animal Oil and Fats", "Vegetable Oil and Fats", "Processed Oils (Animal+Veg)", "Organic Chemicals", "Inorganic Chemicals", "Dye", "Pharmaceutical", "Perfume Materials", "Fertilizer", )
+vertices <- read_csv2(here("data", "01_vertices_import_edited.csv")) 
 
-# Visualise --------------------------------------------------------------------
+# Draw -------------------------------------------------------------------------
 
-df %>% 
-  graph_from_data_frame(vertices = vertices) %>% 
-  ggraph(layout = "circlepack", weight = size) + 
-  geom_node_circle(aes(color = size), alpha = .5) +
-  geom_text(aes(x = x, y = y, label = paste(labl)), check_overlap = TRUE, size = 3) +
-  geom_point(aes(x = x, y = y), size = 1) +
+graph <- graph_from_data_frame(df, vertices = vertices) 
+set.seed(2021)
+ggraph(graph, 'circlepack', weight = size) +
+  geom_node_circle(
+    aes(fill = size), 
+    size = 0.25, alpha = .5, color = "#eccd86"
+  ) +
+  geom_text(
+    aes(x = x, y = y, label = lbl, size = size),
+    check_overlap = FALSE, show.legend = FALSE, color = "#212e53"
+  ) +
+  scale_size_continuous(range = c(1.125, 7)) +
+  scale_fill_gradient2(
+    low = "white",mid = "#FAFAFA", high = "#ebaca2", 
+    labels = scales::comma, midpoint = 500000000
+  ) +
   coord_fixed() +
-  theme_void()
+  labs(
+    title = "\nMain Imports of Greenland\n", fill = "DKK",
+    subtitle = "\n2019\n",
+    caption = "\n\nSource: Statistics Greenland | #30daychartchallenge\n@emilmalta"
+  ) +
+  theme_void(base_family = "MesmerizeRg-Regular") +
+  theme(
+    plot.title = element_text(size = 36, hjust = .5, color = "#212e53"), 
+    plot.subtitle = element_text(hjust = .5), 
+    plot.background =  element_rect(fill = "#FAFAFA", color = NA), 
+    plot.caption = element_text(hjust = .5),
+    plot.margin = margin(25,25,25,25), 
+    panel.background = element_rect(color = NA, fill = "#EFE9DB"), 
+    legend.position = "bottom", 
+    legend.key.width = unit(2, "cm")
+  )
+
