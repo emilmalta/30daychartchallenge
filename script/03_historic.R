@@ -39,16 +39,15 @@ df <-
 
 # Drawing ----------------------------------------------------------------------
 
-p1 <- df %>% 
+(p1 <- df %>% 
   ggplot(aes(x = date, y = lat)) +
-  geom_point(size = .5) +
+  geom_point(size = .5, color = "#64614f") +
   geom_hline(yintercept = 0, lty = 3) +
   scale_x_date(
     date_labels = "%Y",
     breaks = seq(as.Date("1877-01-01"), as.Date("1902-12-31"), by = "1 year"),
     limits = c(as.Date("1876-01-01"), as.Date("1904-01-01")),
-    sec.axis = dup_axis(), 
-    expand = c(.05,.05)
+    sec.axis = dup_axis()
   ) +
   scale_y_continuous(
     breaks = seq(-40, 40, by = 10), 
@@ -63,27 +62,31 @@ p1 <- df %>%
   ) +
   annotate(
     geom="segment", y = seq(-45, 45, 1), yend = seq(-45, 45, 1),
-    x = as.Date("1903-12-01"), xend = as.Date("1903-12-30")
+    x = as.Date("1903-12-01"), xend = as.Date("1903-12-30"), color = "#64614f"
   ) +
-  theme_grey(base_family = "Baskerville") +
+  theme_grey(base_family = "Baskerville", base_size = 8) +
   theme(
     plot.background = element_rect("#fefee1"),
-    panel.grid = element_blank(), plot.margin = margin(30,30,30,30),
-    panel.background = element_rect(fill = NA, color = "black"),
-    axis.text.x = element_text(hjust = -.25),
-    axis.text.y.left  = element_text(vjust = -1, margin = margin(l = 10, r = -10)),
-    axis.text.y.right = element_text(vjust = -1, margin = margin(l = -10, r = 10)),
+    panel.grid = element_blank(), 
+#    plot.margin = margin(30,30,30,30), mar
+    panel.background = element_rect(fill = NA, color = "#64614f"),
+    axis.text.x = element_text(hjust = -.25, color = "#64614f"),
+    axis.text.y.left  = element_text(color = "#64614f", vjust = -1),
+    axis.text.y.right = element_text(color = "#64614f", vjust = -1),
     axis.ticks.length.x = unit(-.75, "cm"), 
     axis.ticks.length.y = unit(-1.95, "cm"), 
     plot.caption.position = "plot"
   )
+)
 
-p2 <- ggplot() +
-  labs(title = "DISTRIBUTION OF SPOT-CENTRES IN LATITUDE, ROTATION BY ROTATION, 1877-1902") +
+(p2 <- ggplot() +
+  labs(title = "DISTRIBUTION OF SPOT-CENTRES IN LATITUDE, ROTATION BY ROTATION, 1877-1902",
+       subtitle = "Original design: Annie S. D. Maunder (1904) | Data: https://solarscience.msfc.nasa.gov/greenwch.shtml | #30daychartchallenge\n@emilmalta") +
   theme_void(base_family = "Baskerville") +
   theme(plot.title = element_text(hjust = .5),
+        plot.subtitle = element_text(hjust = .5),
         plot.background = element_rect("#fefee1", color = NA),
-)
+))
   
   
 p1/p2 + plot_layout(heights = c(15,1))
