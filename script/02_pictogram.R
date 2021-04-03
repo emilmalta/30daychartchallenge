@@ -43,5 +43,3 @@ moon_df %>%
     strip.text = element_text(color = "white", hjust = 0), 
     axis.text = element_text(color = "white")
   )
-
-ggsave(here("output", "plots", "02_pictogram-png"), device = "png", width = unit(71, "mm"), height = unit(151, "mm"))
