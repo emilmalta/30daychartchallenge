@@ -11,13 +11,8 @@ library(here)
 
 moon_df <- tibble(
   date = seq(ymd("2021-01-01"), ymd("2021-12-31"), by = 1),
-  weekday = wday(date, label = TRUE, week_start = 1),
   month = month(date, label = TRUE),
-  week_of_month = fct_rev(factor(ceiling(
-    (day(date) + wday(make_date(year(date), month(date))) - 2) / 7
-    ))),
   moon = getMoonIllumination(date),
-  emoji = map_chr(date, emo::moon)
 )
 
 # Visualise --------------------------------------------------------------------
