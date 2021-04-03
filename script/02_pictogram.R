@@ -5,6 +5,7 @@ library(lubridate)
 library(gggibbous)
 library(extrafont)
 library(suncalc)
+library(here)
 
 # Make data --------------------------------------------------------------------
 
@@ -37,9 +38,10 @@ moon_df %>%
     legend.position = "none", axis.text.y.left = element_blank(),
     text = element_text(color = "white"), 
     plot.margin = margin(30,30,30,30), 
-    plot.background = element_rect("#333333"), 
+    plot.background = element_rect("#3f3f4e"), 
     panel.grid = element_blank(),
     strip.text = element_text(color = "white", hjust = 0), 
     axis.text = element_text(color = "white")
   )
-x
+
+ggsave(here("output", "plots", "02_pictogram-png"), device = "png", width = unit(71, "mm"), height = unit(151, "mm"))
