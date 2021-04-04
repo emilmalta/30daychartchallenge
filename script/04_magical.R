@@ -1,19 +1,13 @@
 # Load libraries ---------------------------------------------------------------
 
-library(paletteer)
-library(wesanderson)
 library(ggbeeswarm)
 library(tidyverse)
+library(paletteer)
 library(tidytext)
 library(ggforce)
 library(rvest)
 library(here)
 library(ragg)
-
-library(extrafont)
-font_import(paths = "data/Mountains_of_Christmas")
-
-loadfonts()
 
 # Import data ------------------------------------------------------------------
 
