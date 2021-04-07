@@ -4,38 +4,21 @@ library(tidyverse)
 library(patchwork)
 library(ggrepel)
 library(readxl)
+library(here)
 library(glue)
 library(ragg)
 
 # Import data ------------------------------------------------------------------
 
-election_results <- tribble(
-  ~ year, ~ party, ~ votes,
-  "2018", "Atassut", 1730,
-  "2018", "Demokraatit", 5712,
-  "2018", "Inuit Ataqatigiit", 7478,
-  "2018", "Naleraq", 3931,
-  "2018", "Nunatta Qitornai", 1002,
-  "2018", "Siumut", 7957,
-  "2018", "Suleqatigiissitsisut", 1193,
-  "2018", "Others", 294,
-  "2021", "Atassut", 1879,
-  "2021", "Demokraatit", 2425,
-  "2021", "Inuit Ataqatigiit", 9912,
-  "2021", "Naleraq", 3249,
-  "2021", "Nunatta Qitornai", 639,
-  "2021", "Siumut", 7971,
-  "2021", "Suleqatigiissitsisut", 375,
-  "2021", "Others", 602
-)
-
 election_municipality_raw <- 
   read_csv(here("data", "gl_election", "mun_election.csv")) %>% 
   fill(municipality)
 
-read_csv(here("data", "gl_election", "mun_election.csv"))
-
 # Tidy -------------------------------------------------------------------------
+
+election_results <- 
+  election_municipality_raw %>% 
+  count(party, year, wt = votes, name = "votes")
 
 election_percent <- election_results %>%
   group_by(year) %>%
@@ -61,39 +44,41 @@ draw_slope <- function(df) {
 
 # National
 p1 <- election_percent %>% draw_slope() +
-  geom_text_repel(family = "MesmerizeRg-Regular",
+  geom_text_repel(
+    aes(label = glue("{party}: {format(votes * 100, digits = 2)}%")),
     data = . %>% filter(year == 2018), hjust = 1, nudge_x = -.07,
-    segment.color = NA, size = 3,
-    aes(label = glue("{party}: {format(votes * 100, digits = 2)}%"))
+    segment.color = NA, size = 3, family = "MesmerizeRg-Regular"
   ) +
-  geom_text_repel(family = "MesmerizeRg-Regular",
+  geom_text_repel(
+    aes(label = glue("{format(votes * 100, digits = 2)}%")),
     data = . %>% filter(year == 2021), hjust = 0, nudge_x = .07,
-    segment.color = NA, size = 3,
-    aes(label = glue("{format(votes * 100, digits = 2)}%"))
+    segment.color = NA, size = 3, family = "MesmerizeRg-Regular"
   ) +
   labs(
     title = "2021 Greenlandic General Election",
-       subtitle = "An Arctic mining Project in Southern Greenland took centre stage in the 2021 election for Inatsisartut.\nInuit Ataqatigiit, a left wing party who has opposed uranium mining for decades, won a clear victory.\nDemokraatit, who were optimistic about the mining project, suffered a devastating loss.\n")
+    subtitle = "An Arctic mining project in Southern Greenland took centre stage in the 2021 election for Inatsisartut.\nInuit Ataqatigiit, a left wing party who has opposed uranium mining for decades, won a clear victory.\nDemokraatit, who were optimistic about the mining project, suffered a devastating loss.\n"
+  )
 
 # By municipality
 p2 <- election_municipality %>% draw_slope() +
-  facet_wrap(~municipality, nrow = 1) +
-  geom_text_repel(family = "MesmerizeRg-Regular",
+  geom_text_repel(
+    aes(label = glue("{format(votes * 100, digits = 3)}%")),
     data = . %>%
       filter(year == 2018, party %in% c("Demokraatit", "Inuit Ataqatigiit")),
     hjust = 0, nudge_x = -.07, size = 2, segment.color = NA,
-    aes(label = glue("{format(votes * 100, digits = 3)}%"))
+    family = "MesmerizeRg-Regular"
   ) +
-  geom_text_repel(family = "MesmerizeRg-Regular",
+  geom_text_repel(
+    aes(label = glue("{format(votes * 100, digits = 2)}%")),
     data = . %>%
       filter(year == 2021, party %in% c("Demokraatit", "Inuit Ataqatigiit")),
     hjust = 1, nudge_x = .07, size = 2, segment.color = NA,
-    aes(label = glue("{format(votes * 100, digits = 2)}%"))
+    family = "MesmerizeRg-Regular"
   ) +
+  facet_wrap(~ municipality, nrow = 1) +
   labs(
-    title = "\n",
-    subtitle = "\n\n\nThe project was set to be in Kujalleq Municipality, where IA won nearly half the vote.\n",
-    caption = "\n\n\nData source: http://qinersineq.gl | #30daychartchallenge\n@emilmalta"
+    subtitle = "The project was set to be in Kujalleq Municipality, where IA won nearly half the vote.\n",
+    caption = "Data source: http://qinersineq.gl | #30daychartchallenge\n@emilmalta"
   )
 
 # Patchwork --------------------------------------------------------------------
@@ -107,22 +92,22 @@ party_colors <- c(
 )
 
 # Patchwork
-(p1 / p2) &
+(p1 / p2) + 
+  plot_layout(heights = c(5,2)) &
   geom_line(size = 1.5, alpha = .12) &
   geom_point(size = 3, pch = 21, fill = "white", stroke = 1.5) &
   scale_color_manual(values = party_colors) &
   labs(x = NULL, y = NULL, color = NULL) &
   theme_minimal(base_family = "MesmerizeRg-Regular") +
   theme(
-    plot.margin = margin(20,20,20,20),
+    plot.background = element_blank(),
     plot.title = element_text(hjust = .5, size = 34), 
     plot.subtitle = element_text(hjust = .5), 
-    plot.caption = element_text(hjust = .5),
+    plot.caption = element_text(hjust = .5, margin = margin(30)),
     legend.position = "none",
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_line("darkgrey"),
     panel.grid.major.y = element_blank(),
     axis.text.y = element_blank(),
     axis.text.x = element_text(), axis.title.x = element_text()
-  ) &
-  plot_layout(heights = c(5,3))
+  ) 
