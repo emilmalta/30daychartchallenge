@@ -72,11 +72,13 @@ ngrams <- map_df(1:3, ~ {
 # Tidy spells
 spells <- spell_library %>% left_join(ngrams) %>% drop_na()
 
-# Visualise --------------------------------------------------------------------
+# Visualize --------------------------------------------------------------------
 
 # Wingardium draw a plot
 spells %>% 
-  ggplot(aes(x = pos, y = fct_rev(book), color = Type, label = Incantation)) +
+  janitor::clean_names() %>% 
+  mutate(lbl = paste(incantation, "\n", resulting_effect)) %>% 
+  ggplot(aes(x = pos, y = fct_rev(book), color = type, label = lbl)) +
   geom_quasirandom(
     groupOnX = FALSE, size = 2.25, alpha = .65, width = .25, shape = 8
   ) +
@@ -99,4 +101,8 @@ spells %>%
     axis.text.y = element_text(hjust = 0), 
     panel.grid.minor = element_blank(), 
     panel.grid.major.x = element_blank()
-  ) 
+  )  -> ggg
+
+ggg
+
+plotly::ggplotly(ggg, tooltip = c("lbl"))
