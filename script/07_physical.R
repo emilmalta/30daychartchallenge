@@ -41,6 +41,7 @@ p <- nba %>%
     caption = "\nData Source: Sports Viz Sundays (through data.world)\n#30daychartchallenge | @emilmalta"
   ) +
   scale_color_manual(values = types) +
+  scale_y_reverse() +
   theme(
     plot.background = element_rect(fill = "#f8e9d6", color = NA),
     plot.margin = margin(15,15,15,15),
