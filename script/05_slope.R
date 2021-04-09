@@ -77,7 +77,7 @@ p2 <- election_municipality %>% draw_slope() +
   ) +
   facet_wrap(~ municipality, nrow = 1) +
   labs(
-    subtitle = "The project was set to be in Kujalleq Municipality, where IA won nearly half the vote.\n",
+    subtitle = "\nThe project was set to be in Kujalleq Municipality, where IA won nearly half the vote.\n",
     caption = "Data source: http://qinersineq.gl | #30daychartchallenge\n@emilmalta"
   )
 
