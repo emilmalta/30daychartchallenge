@@ -16,7 +16,6 @@ pi <- tibble(
 
 pi_graph <- pi %>% 
   unnest_tokens(digit, pi, "characters") %>%
-  slice(1:11) %>% 
   mutate(from = paste(digit, row_number()), to = lead(from)) %>% 
   drop_na() %>% 
   as_tbl_graph() %>% 
