@@ -16,14 +16,12 @@ pi <- tibble(
 
 pi_graph <- pi %>% 
   unnest_tokens(digit, pi, "characters") %>%
-  group_by(digit) %>% 
-  mutate(from = paste(digit, row_number())) %>% 
-  ungroup() %>% 
-  mutate(to = lead(from)) %>% 
+  slice(1:11) %>% 
+  mutate(from = paste(digit, row_number()), to = lead(from)) %>% 
   drop_na() %>% 
   as_tbl_graph() %>% 
   mutate(digit = str_sub(name, end = 1L)) %>% 
-  arrange(digit) 
+  arrange(name) 
 
 # Visualise --------------------------------------------------------------------
 
@@ -61,5 +59,3 @@ pi_graph %>%
     plot.margin = margin(20,20,20,20),
     text = element_text(color = "white")
   )
-
-  
