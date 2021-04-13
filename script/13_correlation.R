@@ -22,7 +22,7 @@ draw_path <- function(df, y_val) {
     geom_shadowtext(
       bg.color = "white",
       data  = . %>% filter(Year == max(Year)), family = "MesmerizeScLt-Regular",
-      check_overlap = TRUE, color = "black", size = 3, nudge_y = -.0125)
+      check_overlap = TRUE, color = "black", size = 5, nudge_y = -.0125)
 }
 
 # Import data ------------------------------------------------------------------
@@ -55,7 +55,7 @@ health_expend_tidy <- health_expend_raw %>%
 
 p1 <- health_expend_tidy %>% 
   draw_path(`Life expectancy at birth, total (years)`) +
-  coord_cartesian(clip = "off", xlim = c(300, 8000), ylim = c(65,85)) +
+  coord_cartesian(clip = "off", xlim = c(400, 8000), ylim = c(65,85)) +
   scale_y_continuous(labels = unit_format(accuracy = 1, unit = "")) +
   labs(
     x = NULL, title = "Health Expenditure (1970-2015)", 
@@ -64,7 +64,7 @@ p1 <- health_expend_tidy %>%
 
 p2 <- health_expend_tidy %>% 
   draw_path(`Mortality rate, under-5 (per 1,000 live births)`) +
-  coord_cartesian(clip = "off", xlim = c(300, 8000), ylim = c(2, 100)) +
+  coord_cartesian(clip = "off", xlim = c(400, 8000), ylim = c(2, 100)) +
   scale_y_log10() +
   labs(
     subtitle = "\nChild Mortality Rate (pr. 1,000 Live Births - Log Scale)",
@@ -76,7 +76,7 @@ p2 <- health_expend_tidy %>%
 
 cols <- c(
   "Asia" = "#61b568",
-  "Europe" = "#6bc3e0",
+  "Europe" = "#4682b4",
   "North America" = "#cf4500",
   "Oceania" = "#a02c5d",
   "South America" = "#fca449"
@@ -96,8 +96,12 @@ p1 / p2  +
   theme(
     text = element_text("MesmerizeRg-Regular"),
     legend.position = "bottom", 
-    panel.background = element_rect(fill = "#f7f7f7"),
-    plot.margin = margin(10, 15, 10, 5), 
+    plot.background = element_rect(fill = "#f7f7f7", color = NA),
+    panel.background = element_blank(),
+    panel.grid = element_line(color = "#e5e1d8"),
+    legend.background = element_blank(), 
+    plot.caption.position = "plot", 
+    plot.margin = margin(10, 25, 10, 20), 
     plot.title = element_text(size = 26),
     plot.title.position = "plot"
   ) 
