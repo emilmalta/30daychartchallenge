@@ -51,10 +51,7 @@ health_expend_tidy <- health_expend_raw %>%
   drop_na() %>% 
   arrange(Year, desc(`Total population (Gapminder, HYDE & UN)`))
   
-
 # Visualise --------------------------------------------------------------------
-
-y = `Life expectancy at birth, total (years)`
 
 p1 <- health_expend_tidy %>% 
   draw_path(`Life expectancy at birth, total (years)`) +
