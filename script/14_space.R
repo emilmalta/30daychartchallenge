@@ -16,7 +16,7 @@ options(scipen = 999)
 
 # Import data ------------------------------------------------------------------
 
-planets_raw <- read_csv(here("data", "planets/", "exoplanets.csv"))
+planets_raw <- read_csv(here("data", "planets", "table.csv"))
 pl_archive <- read_csv(here("data", "planets", "planet_archive.csv"), skip = 100)
 
 # Tidy -------------------------------------------------------------------------
@@ -56,15 +56,18 @@ planets_tidy %>%
     fill = "red", color = "white", pch = 21
   ) +
   annotate(
-    geom = "text", y = 8700, x = 950, size = 7, color = "white",
-    family = "MesmerizeScLt-Regular", 
-    label = "The Habitable Zone (THZ) is the range of distances from a star,\nwhere a planet could have liquid water on the surface. Colored\ndots in this graph show planets estimated to spend at least\nsome time in THZ. These are optimistic values, based on\nresearch by Kopparapu et al. (2014)\n\nDiscovered Exoplanets are generally much bigger than Earth,\nbecause bigger planets are easier to detect. See if you can find\nEarth on this graph, marked in red!",
+    geom = "text", y = 5900, x = .7, size = 3, label = "Earth", color = "red",
+  ) +
+  annotate(
+    geom = "text", y = 8900, x = 800, size = 5, color = "white",
+    family = "MesmerizeScLt-Regular",
+    label = "The Habitable Zone (THZ) is the range of distances from a star,\nwhere a planet could have liquid water on the surface. Colored\ndots in this graph show planets estimated to spend at least\nsome time in THZ. These are optimistic values, based on\nresearch by Kopparapu et al. (2014).",
     hjust = 0
   ) +
   scale_fill_continuous(breaks = c(25, 50, 75, 100), type = "viridis") +
   scale_x_continuous(trans = trans_reverser('log10')) +
   scale_y_continuous() +
-  scale_size_area(max_size = 24) +
+  scale_radius(range = c(0, 24)) +
   guides(
     size = "none", 
     fill = guide_legend(title.position = "left", override.aes = list(size = 10))
