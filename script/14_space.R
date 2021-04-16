@@ -51,9 +51,10 @@ planets_tidy %>%
     size = 3, check_overlap = TRUE,
     family = "MesmerizeScLt-Regular", color = "white", nudge_y = -75
   ) +
-  annotate(
-    geom = "point", y = 5780, x = 1, size = 1, 
-    fill = "red", color = "white", pch = 21
+  geom_point(
+    data = tibble(pl_insol = 1, st_teff = 5780, pl_rade =1, pl_name = "Earth"),
+    aes(x = pl_insol, y = st_teff, size = pl_rade), 
+    fill = "red", pch = 21, color = "white"
   ) +
   annotate(
     geom = "text", y = 5900, x = .7, size = 3, label = "Earth", color = "red",
