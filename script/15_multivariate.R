@@ -2,7 +2,6 @@
 
 library(tidyverse)
 library(gganimate)
-library(trekcolors)
 library(ggforce)
 library(scales)
 library(statgl)
@@ -10,10 +9,6 @@ library(here)
 library(ragg)
 
 # Import data ------------------------------------------------------------------
-
-statgl_search("Qinngorput")
-
-# Impport data -----------------------------------------------------------------
 
 nuuk_raw <- statgl_url("BEXSTNUK") %>% statgl_fetch(.eliminate_rest = FALSE)
 
