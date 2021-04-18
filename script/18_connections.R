@@ -57,7 +57,7 @@ ggplot() +
   geom_sf(
     data = coast_sf, color = "#ff8e51", lty = 3, fill = NA, alpha = .25,)  +
   geom_path(
-    data = routes_sf, aes(X, Y, group = group), alpha = .025,
+    data = routes, aes(X, Y, group = group), alpha = .025,
     color = "#fffbe9") +
   labs(
     caption = "Data Source: OpenFlights | #30daychartchallenge\n@emilmalta",
@@ -65,12 +65,8 @@ ggplot() +
   ) +
   theme_void() +
   theme(
-    text = element_text(family = "MesmerizeRg-Regular", color = "white"), 
+    text = element_text(family = "MesmerizeRg-Regular", color = "#fffbe9"), 
     plot.background = element_rect("#8b2500", color = NA), 
-    legend.position = "top", legend.key = element_blank(), 
-    legend.justification = 0, 
-    legend.margin = margin(l = 0),
-    title = element_text(margin = margin(l = 0)),
-    plot.margin = margin(20,20,20,20), 
+    plot.margin = margin(b = 20, r = 20),
     axis.title.x = element_text(size = 48, margin = margin(20, b = 20))
   )
