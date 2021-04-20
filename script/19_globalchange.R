@@ -4,7 +4,6 @@ library(rnaturalearth)
 library(tidyverse)
 library(janitor)
 library(scales)
-library(statgl)
 library(magick)
 library(here)
 library(sf)
@@ -25,18 +24,13 @@ world_raw <- ne_countries(scale = 50, returnclass = "sf") %>%
 world_sf <- world_raw %>% 
   select(iso_a3, continent) %>% 
   mutate(continent = case_when(
-    continent == "Seven seas (open ocean)" ~ "Intl. Transport",
+    continent == "Seven seas (open ocean)" ~ "Seven Seas",
     T ~ continent
   )) %>% 
   drop_na()
 
 co2_world <- co2_world_raw %>% 
   inner_join(world_sf, by = c("code" = "iso_a3")) %>% 
-  mutate(
-    continent = fct_reorder(continent, annual_co2_emissions, sum)
-  ) %>% 
-  arrange(continent, desc(annual_co2_emissions)) %>% 
-  mutate(entity = fct_inorder(entity)) %>% 
   st_as_sf(crs = 4326) %>% 
   st_transform(
     "+proj=vandg +lon_0=0 +x_0=0 +y_0=0 +R_A +datum=WGS84 +units=m +no_defs"
@@ -50,7 +44,32 @@ top_15 <- co2_world %>%
   mutate(entity = fct_lump(entity, 15, w = annual_co2_emissions)) %>% 
   filter(as.character(entity) != "Other")
 
+# Seven Seas in NOT Intl. Transport!
+area_df <- co2_world %>% 
+  st_drop_geometry() %>% 
+  bind_rows(
+    co2_world_raw %>% 
+      filter(entity == "International transport") %>% 
+      mutate(code = "hi", continent = "Intl. Transport")
+  ) %>% 
+  mutate(
+    continent = fct_reorder(continent, annual_co2_emissions, sum)
+  ) %>% 
+  arrange(continent, desc(annual_co2_emissions)) %>% 
+  mutate(entity = fct_inorder(entity)) 
+
 # Visualise --------------------------------------------------------------------
+
+cols <- c(
+  "Europe" = "#004559",
+  "Asia" = "#017f98",
+  "North America" = "#94bb1f",
+  "Africa" = "#cfe006",
+  "South America" = "#fce207",
+  "Oceania" = "#f96e38",
+  "Seven Seas" = "#f85700",
+  "Intl. Transport" = "#f8a41a"
+)
 
 p1 <- co2_world %>% 
   filter(year %in% c(1850, 1950, 2019)) %>% 
@@ -65,7 +84,7 @@ p1 <- co2_world %>%
     data = top_15, size = 5, check_overlap = TRUE, color = "#fffbe9",
     family = "MesmerizeScLt-Regular"
   ) +
-  scale_color_statgl(reverse = TRUE) +
+  scale_color_manual(values = cols) +
   scale_size_area(max_size = 35) +
   facet_wrap(~ year, ncol = 1) +
   coord_fixed() +
@@ -78,12 +97,12 @@ p1 <- co2_world %>%
     text = element_text(family = "MesmerizeRg-Regular", colour = "#fffbe9"),
   ) 
 
-p2 <- co2_world %>% 
+p2 <- area_df %>% 
   ggplot(aes(
     year, annual_co2_emissions, fill = continent, group = entity
   )) +
   geom_area(color = "#fffbe9", size = .1) +
-  scale_fill_statgl(reverse = TRUE) +
+  scale_fill_manual(values = cols) +
   scale_y_continuous(labels = scales::comma_format(scale = 1e-9), position = "right") +
   guides(fill = guide_legend(nrow = 1, reverse = TRUE)) +
   coord_cartesian(xlim = c(1830, 2019)) +
@@ -118,6 +137,4 @@ point_png <- image_read(here("output", "proc_data", "co2_points.png")) %>%
   image_scale("2200") 
 area_png <- image_read(here("output", "proc_data", "co2_area.png"))
 
-
 image_mosaic(c(area_png, point_png))
-
