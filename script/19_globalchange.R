@@ -72,7 +72,7 @@ p1 <- co2_world %>%
   theme_void(base_size = 20) +
   theme(
     legend.position = "none", 
-    plot.margin = margin(t = 90, l = 70), 
+    plot.margin = margin(t = 90, l = 180), 
     strip.text = element_text(size = 20, margin = margin(15,15,15,15)),
     panel.border = element_rect(fill = NA, color = "#fffbe9"),
     text = element_text(family = "MesmerizeRg-Regular", colour = "#fffbe9"),
@@ -112,7 +112,7 @@ ggsave(here("output", "proc_data", "co2_points.png"), p1,
        width = 10, height = 14, bg = "transparent")
 
 ggsave(here("output", "proc_data", "co2_area.png"), p2, 
-       width = 13, height = 14, bg = "transparent")
+       width = 13, height = 15, bg = "transparent")
 
 point_png <- image_read(here("output", "proc_data", "co2_points.png")) %>% 
   image_scale("2200") 

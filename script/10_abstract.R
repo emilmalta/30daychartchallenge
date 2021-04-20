@@ -4,6 +4,7 @@ library(tidyverse)
 library(osmdata)
 library(here)
 library(ragg)
+library(ggfx)
 library(sf)
 
 # Import data ------------------------------------------------------------------
@@ -37,10 +38,10 @@ aarhus_roads <- aarhus_canvas %>%
 # Visualise --------------------------------------------------------------------
 
 ggplot() +
-  geom_point(
+  with_blur(geom_point(
     data = aarhus_buildings, alpha = .125,
     aes(X, Y,size = size, color = log(size))
-  ) +
+  )) +
   geom_sf(
     data = aarhus_roads, alpha = .5, color = "white", size = .125
   ) +
